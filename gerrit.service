@@ -1,0 +1,24 @@
+[Unit]
+Description=Web based code review and project management for Git based projects
+After=network.target mariadb.service
+
+[Service]
+Type=simple
+User=gerrit
+SyslogIdentifier=gerrit
+EnvironmentFile=-/etc/sysconfig/gerrit
+ExecStartPre=/usr/bin/wait4service $GERRIT_SQL_SERVER
+ExecStart=/usr/bin/java -Xmx${GERRIT_HEAP_LIMIT} -Djava.security.egd=file:///dev/urandom -jar /usr/lib64/gerrit/release.war daemon -d /var/lib/gerrit/ --console-log
+ExecStartPost=/usr/bin/wait4service localhost 29418
+ExecStop=/bin/kill -s SIGINT $MAINPID
+# stupid java exit codes
+SuccessExitStatus=130 SIGINT
+SuccessExitStatus=143 SIGTERM
+LimitCPU=infinity
+LimitFSIZE=infinity
+LimitDATA=infinity
+LimitAS=infinity
+LimitLOCKS=infinity
+
+[Install]
+WantedBy=multi-user.target
