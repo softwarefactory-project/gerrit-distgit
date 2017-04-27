@@ -537,7 +537,7 @@ install -p -D -m 755 buck-out/gen/plugins/avatars-gravatar/avatars-gravatar.jar 
 install -p -D -m 755 buck-out/gen/plugins/delete-project/delete-project.jar %{buildroot}%{_libdir}/gerrit/plugins/delete-project.jar
 install -p -D -m 755 buck-out/gen/plugins/reviewers-by-blame/reviewers-by-blame.jar %{buildroot}%{_libdir}/gerrit/plugins/reviewers-by-blame.jar
 
-install -p -D -m 755 %{SOURCE1} %{buildroot}%{_unitdir}/gerrit.service
+install -p -D -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/gerrit.service
 
 install -d -m 755 %{buildroot}%{_sysconfdir}/sysconfig/
 echo "GERRIT_HEAP_LIMIT=2g" > %{buildroot}%{_sysconfdir}/sysconfig/gerrit
