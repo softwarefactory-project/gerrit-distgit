@@ -1,0 +1,69 @@
+From 301ffe96a366d383f6477b61c2530c2e8c4215ed Mon Sep 17 00:00:00 2001
+From: Tristan Cacqueray <tdecacqu@redhat.com>
+Date: Tue, 27 Mar 2018 03:09:05 +0000
+Subject: [PATCH] QuickFix read-only /usr/lib dir
+
+---
+ .../java/com/google/gerrit/pgm/init/InitContainer.java   |  4 ++--
+ .../com/google/gerrit/pgm/init/SitePathInitializer.java  | 16 +++-------------
+ 2 files changed, 5 insertions(+), 15 deletions(-)
+
+diff --git a/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitContainer.java b/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitContainer.java
+index 3958069..3ad7f78 100644
+--- a/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitContainer.java
++++ b/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitContainer.java
+@@ -78,13 +78,13 @@ class InitContainer implements InitStep {
+         copy = ui.yesno(true, "Upgrade %s", siteWar);
+       } else {
+         copy = ui.yesno(true, "Copy %s to %s", myWar.getFileName(), siteWar);
+-        if (copy) {
++        if (false) {
+           container.unset("war");
+         } else {
+           container.set("war", myWar.toAbsolutePath().toString());
+         }
+       }
+-      if (copy) {
++      if (false) {
+         if (!ui.isBatch()) {
+           System.err.format("Copying %s to %s", myWar.getFileName(), siteWar);
+           System.err.println();
+diff --git a/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/SitePathInitializer.java b/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/SitePathInitializer.java
+index 243ea09..cdde3cb 100644
+--- a/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/SitePathInitializer.java
++++ b/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/SitePathInitializer.java
+@@ -76,16 +76,6 @@ public class SitePathInitializer {
+       flags.deleteOnFailure = true;
+     }
+ 
+-    mkdir(site.bin_dir);
+-    mkdir(site.etc_dir);
+-    mkdir(site.lib_dir);
+-    mkdir(site.tmp_dir);
+-    mkdir(site.logs_dir);
+-    mkdir(site.mail_dir);
+-    mkdir(site.static_dir);
+-    mkdir(site.plugins_dir);
+-    mkdir(site.data_dir);
+-
+     for (InitStep step : steps) {
+       if (step instanceof InitPlugins && flags.skipPlugins) {
+         continue;
+@@ -96,11 +86,11 @@ public class SitePathInitializer {
+     saveSecureStore();
+     savePublic(flags.cfg);
+ 
+-    extract(site.gerrit_sh, getClass(), "gerrit.sh");
++    
+     chmod(0755, site.gerrit_sh);
+-    extract(site.gerrit_service, getClass(), "gerrit.service");
++    
+     chmod(0755, site.gerrit_service);
+-    extract(site.gerrit_socket, getClass(), "gerrit.socket");
++    
+     chmod(0755, site.gerrit_socket);
+     chmod(0700, site.tmp_dir);
+ 
+-- 
+1.8.3.1
+
