@@ -1,6 +1,6 @@
 Name:          gerrit
 Version:       2.11.10
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Code review system
 
 License:       APACHE-2
@@ -58,8 +58,8 @@ Source135:     http://repo1.maven.org/maven2/com/googlecode/juniversalchardet/ju
 Source136:     http://repo1.maven.org/maven2/com/googlecode/juniversalchardet/juniversalchardet/1.0.3/juniversalchardet-1.0.3.jar
 Source137:     http://repo1.maven.org/maven2/com/h2database/h2/1.3.174/h2-1.3.174-sources.jar
 Source138:     http://repo1.maven.org/maven2/com/h2database/h2/1.3.174/h2-1.3.174.jar
-Source139:     http://repo1.maven.org/maven2/com/jcraft/jsch/0.1.51/jsch-0.1.51-sources.jar
-Source140:     http://repo1.maven.org/maven2/com/jcraft/jsch/0.1.51/jsch-0.1.51.jar
+Source139:     http://repo1.maven.org/maven2/com/jcraft/jsch/0.1.54/jsch-0.1.54-sources.jar
+Source140:     http://repo1.maven.org/maven2/com/jcraft/jsch/0.1.54/jsch-0.1.54.jar
 Source141:     http://repo1.maven.org/maven2/commons-codec/commons-codec/1.4/commons-codec-1.4-sources.jar
 Source142:     http://repo1.maven.org/maven2/commons-codec/commons-codec/1.4/commons-codec-1.4.jar
 Source143:     http://repo1.maven.org/maven2/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar
@@ -206,7 +206,7 @@ Provides:      bundled(protobuf-java-2.5.0)
 Provides:      bundled(JavaEWAH-0.7.9)
 Provides:      bundled(juniversalchardet-1.0.3)
 Provides:      bundled(h2-1.3.174)
-Provides:      bundled(jsch-0.1.51)
+Provides:      bundled(jsch-0.1.54)
 Provides:      bundled(commons-codec-1.4)
 Provides:      bundled(commons-collections-3.2.2)
 Provides:      bundled(commons-dbcp-1.4)
@@ -340,6 +340,9 @@ sed -i 's|if (copy) {|if (false) {|' gerrit-pgm/src/main/java/com/google/gerrit/
 # Disable gerrit.sh creation
 sed -i 's|extract(site.gerrit_sh, getClass(), "gerrit.sh");||' gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/SitePathInitializer.java
 sed -i 's|chmod(0755, site.gerrit_sh);||' gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/SitePathInitializer.java
+# Bump JSCH lib due to https://github.com/blog/2507-weak-cryptographic-standards-removed
+sed -i 's/com.jcraft:jsch:0.1.51/com.jcraft:jsch:0.1.54/' lib/BUCK
+sed -i 's/6ceee2696b07cc320d0e1aaea82c7b40768aca0f/da3584329a263616e277e15462b387addd1b208d/' lib/BUCK
 
 tar -xzf %{SOURCE10} -C plugins/commit-message-length-validator/
 tar -xzf %{SOURCE11} -C plugins/download-commands/
@@ -391,8 +394,8 @@ mv %{SOURCE135} /builddir/.gerritcodereview/buck-cache/juniversalchardet-1.0.3-s
 mv %{SOURCE136} /builddir/.gerritcodereview/buck-cache/juniversalchardet-1.0.3.jar-cd49678784c46aa8789c060538e0154013bb421b
 mv %{SOURCE137} /builddir/.gerritcodereview/buck-cache/h2-1.3.174-src.jar-c490e234510149710dcae2bfc562a978803aecf0
 mv %{SOURCE138} /builddir/.gerritcodereview/buck-cache/h2-1.3.174.jar-2fb55391f525bc3ef9f320a379d19350af96a554
-mv %{SOURCE139} /builddir/.gerritcodereview/buck-cache/jsch-0.1.51-src.jar-57b439241833914499ea163b68f71e3f76a52ec6
-mv %{SOURCE140} /builddir/.gerritcodereview/buck-cache/jsch-0.1.51.jar-6ceee2696b07cc320d0e1aaea82c7b40768aca0f
+mv %{SOURCE139} /builddir/.gerritcodereview/buck-cache/jsch-0.1.54-src.jar-91d6069df9be9e076bdb124e82fc2a9af9547616
+mv %{SOURCE140} /builddir/.gerritcodereview/buck-cache/jsch-0.1.54.jar-da3584329a263616e277e15462b387addd1b208d
 mv %{SOURCE141} /builddir/.gerritcodereview/buck-cache/commons-codec-1.4-src.jar-803197d8593ea641de0927614262119c2c695d24
 mv %{SOURCE142} /builddir/.gerritcodereview/buck-cache/commons-codec-1.4.jar-4216af16d38465bbab0f3dff8efa14204f7a399a
 mv %{SOURCE143} /builddir/.gerritcodereview/buck-cache/commons-collections-3.2.2.jar-8ad72fe39fa8c91eaaf12aadb21e0c3661fe26d5
@@ -603,6 +606,9 @@ exit 0
 %{_libdir}/gerrit/plugins/reviewers-by-blame.jar
 
 %changelog
+* Fri Feb 23 2018 Fabien Boucher <fboucher@redhat.com> 2.11.10-3
+- Bump JSCH to 0.1.54
+
 * Thu Apr 27 2017 Fabien Boucher <fboucher@redhat.com> 2.11.10-2
 - Change gerrit.service mode to 644
 
