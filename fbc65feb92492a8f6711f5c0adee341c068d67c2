@@ -16,6 +16,24 @@
       "revId": "fbc65feb92492a8f6711f5c0adee341c068d67c2",
       "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a41bdd9_0530b655",
+        "filename": "gerrit.spec",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 7
+      },
+      "writtenOn": "2018-03-28T11:50:12Z",
+      "side": 1,
+      "message": "It\u0027s created with the build.sh script. The idea is to avoid bazel/maven dependencies management on el7 and hope for better dependency management with el8.",
+      "parentUuid": "9a41bdd9_25f29a9b",
+      "revId": "fbc65feb92492a8f6711f5c0adee341c068d67c2",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
     }
   ]
 }
