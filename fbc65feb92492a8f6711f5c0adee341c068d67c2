@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a41bdd9_25f29a9b",
+        "filename": "gerrit.spec",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 201
+      },
+      "writtenOn": "2018-03-28T11:35:10Z",
+      "side": 1,
+      "message": "This isn\u0027t vanilla upstream source tarball, how is it generated?",
+      "revId": "fbc65feb92492a8f6711f5c0adee341c068d67c2",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    }
+  ]
+}
