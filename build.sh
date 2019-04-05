@@ -1,12 +1,13 @@
 #!/bin/sh -ex
 
-VERSION=2.14.7
-PLUGIN_BRANCH=stable-2.14
+VERSION=2.16.7
+PLUGIN_BRANCH=stable-2.16
 MYSQL_CONNECTOR_BUNDLE=5.1.41
 PLUGINS="avatars-gravatar delete-project reviewers-by-blame"
 
 function install_bazel() {
-    sudo yum install -y https://copr-be.cloud.fedoraproject.org/results/vbatts/bazel/epel-7-x86_64/00725354-bazel/bazel-0.11.1-1.el7.centos.x86_64.rpm
+    sudo curl -o /etc/yum.repos.d/bazel.repo https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo
+    sudo yum install -y bazel
 }
 
 function fetch_gerrit_sources() {
@@ -15,12 +16,6 @@ function fetch_gerrit_sources() {
     git checkout v${VERSION}
     git submodule foreach --recursive git checkout v${VERSION}
     popd
-}
-
-function fetch_dependencies() {
-    [ -f lib/mysql-connector-java-${MYSQL_CONNECTOR_BUNDLE}.jar ] || curl \
-        -o lib/mysql-connector-java-${MYSQL_CONNECTOR_BUNDLE}.jar \
-        -L https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_CONNECTOR_BUNDLE}/mysql-connector-java-${MYSQL_CONNECTOR_BUNDLE}.jar
 }
 
 function fetch_plugins() {
@@ -66,7 +61,8 @@ function gerrit_install() {
     cp -f gerrit/bazel-bin/release.war artifacts/
     cp -f gerrit/bazel-genfiles/plugins/*/*.jar artifacts/plugins/
     pushd artifacts
-    fetch_dependencies
+    # This plugin cause a stacktrace on start
+    rm -f plugins/gr-delete-repo-static.jar plugins/cm-static.jar
     find ./ -type f -exec chmod 644 {} \;
     tar czf ../gerrit-${VERSION}.tar.gz *
     popd

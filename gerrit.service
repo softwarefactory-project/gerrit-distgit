@@ -7,7 +7,6 @@ Type=simple
 User=gerrit
 SyslogIdentifier=gerrit
 EnvironmentFile=-/etc/sysconfig/gerrit
-ExecStartPre=/usr/bin/wait4service $GERRIT_SQL_SERVER
 ExecStart=/usr/libexec/gerrit/gerrit.sh
 ExecStartPost=/usr/bin/wait4service localhost 29418 && curl -sS --retry 5 --retry-delay 2 http://localhost:8000/
 ExecStop=/bin/kill -s SIGINT $MAINPID

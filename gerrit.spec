@@ -1,5 +1,5 @@
 Name:          gerrit
-Version:       2.14.7
+Version:       2.16.7
 Release:       1%{?dist}
 Summary:       Code review system
 
@@ -77,8 +77,7 @@ Gerrit reviewers-by-blame plugin
 
 %install
 install -p -D -m 755 release.war %{buildroot}%{_libdir}/gerrit/release.war
-install -p -D -m 644 lib/mysql-connector-java-5.1.41.jar %{buildroot}%{_libdir}/gerrit/lib/mysql-connector-java-5.1.41.jar
-
+install -p -d -m 755 %{buildroot}%{_libdir}/gerrit/lib
 install -d -m 755 %{buildroot}%{_libdir}/gerrit/plugins
 mv plugins/*.jar %{buildroot}%{_libdir}/gerrit/plugins
 
@@ -117,8 +116,9 @@ exit 0
 
 %files
 %{_libdir}/gerrit/release.war
-%{_libdir}/gerrit/lib/
+%dir %{_libdir}/gerrit/lib
 %{_libdir}/gerrit/plugins/hooks.jar
+%{_libdir}/gerrit/plugins/codemirror-editor.jar
 %{_sysconfdir}/gerrit
 %{_sysconfdir}/sysconfig/gerrit
 %{_unitdir}/gerrit.service
@@ -153,6 +153,9 @@ exit 0
 %{_libdir}/gerrit/plugins/reviewers-by-blame.jar
 
 %changelog
+* Fri Apr 05 2019 Tristan Cacqueray <tdecacqu@redhat.com> - 2.16.7-1
+- Update version to 2.16.7
+
 * Wed Mar 28 2018 Tristan Cacqueray <tdecacqu@redhat.com> - 2.14.7-1
 - Update version to 2.14.7
 

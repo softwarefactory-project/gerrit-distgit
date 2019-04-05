@@ -1,32 +1,32 @@
-From 1b94c681c8a8e4a95bd75c78112fc4fadd5f2a98 Mon Sep 17 00:00:00 2001
+From 7a5acebc0fb96c7ebd454802e73721f3c4832751 Mon Sep 17 00:00:00 2001
 From: Tristan Cacqueray <tdecacqu@redhat.com>
 Date: Mon, 26 Mar 2018 06:31:30 +0000
 Subject: [PATCH] Add InitSFUser method
 
 ---
- .../com/google/gerrit/pgm/init/InitModule.java     |   1 +
- .../com/google/gerrit/pgm/init/InitSFUser.java     | 149 +++++++++++++++++++++
- 2 files changed, 150 insertions(+)
- create mode 100644 gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitSFUser.java
+ .../google/gerrit/pgm/init/InitModule.java    |   1 +
+ .../google/gerrit/pgm/init/InitSFUser.java    | 182 ++++++++++++++++++
+ 2 files changed, 183 insertions(+)
+ create mode 100644 java/com/google/gerrit/pgm/init/InitSFUser.java
 
-diff --git a/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitModule.java b/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitModule.java
-index f6b7e6ae77..9924de885b 100644
---- a/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitModule.java
-+++ b/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitModule.java
-@@ -53,6 +53,7 @@ public class InitModule extends FactoryModule {
-     }
+diff --git a/java/com/google/gerrit/pgm/init/InitModule.java b/java/com/google/gerrit/pgm/init/InitModule.java
+index f677cebeae..78bcc94a8c 100644
+--- a/java/com/google/gerrit/pgm/init/InitModule.java
++++ b/java/com/google/gerrit/pgm/init/InitModule.java
+@@ -52,6 +52,7 @@ public class InitModule extends FactoryModule {
+     step().to(InitLogging.class);
      step().to(InitIndex.class);
      step().to(InitAuth.class);
 +    step().to(InitSFUser.class);
      step().to(InitAdminUser.class);
      step().to(InitLabels.class);
      step().to(InitSendEmail.class);
-diff --git a/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitSFUser.java b/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitSFUser.java
+diff --git a/java/com/google/gerrit/pgm/init/InitSFUser.java b/java/com/google/gerrit/pgm/init/InitSFUser.java
 new file mode 100644
-index 0000000000..12a223c568
+index 0000000000..962fac7ce3
 --- /dev/null
-+++ b/gerrit-pgm/src/main/java/com/google/gerrit/pgm/init/InitSFUser.java
-@@ -0,0 +1,149 @@
++++ b/java/com/google/gerrit/pgm/init/InitSFUser.java
+@@ -0,0 +1,182 @@
 +// Copyright (C) 2018 Red Hat
 +//
 +// Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,21 +46,26 @@ index 0000000000..12a223c568
 +import static java.nio.charset.StandardCharsets.UTF_8;
 +
 +import com.google.common.base.Strings;
-+import com.google.gerrit.common.TimeUtil;
++import com.google.gerrit.common.data.GroupReference;
++import com.google.gerrit.common.errors.NoSuchGroupException;
 +import com.google.gerrit.extensions.client.AuthType;
++import com.google.gerrit.pgm.init.api.AllUsersNameOnInitProvider;
 +import com.google.gerrit.pgm.init.api.ConsoleUI;
 +import com.google.gerrit.pgm.init.api.InitFlags;
 +import com.google.gerrit.pgm.init.api.InitStep;
++import com.google.gerrit.pgm.init.api.SequencesOnInit;
 +import com.google.gerrit.reviewdb.client.Account;
-+import com.google.gerrit.reviewdb.client.AccountGroup;
-+import com.google.gerrit.reviewdb.client.AccountGroupMember;
-+import com.google.gerrit.reviewdb.client.AccountGroupName;
-+import com.google.gerrit.reviewdb.client.AccountSshKey;
 +import com.google.gerrit.reviewdb.server.ReviewDb;
++import com.google.gerrit.server.account.AccountSshKey;
 +import com.google.gerrit.server.account.AccountState;
-+import com.google.gerrit.server.account.ExternalId;
++import com.google.gerrit.server.account.externalids.ExternalId;
++import com.google.gerrit.server.config.AllUsersName;
++import com.google.gerrit.server.group.InternalGroup;
 +import com.google.gerrit.server.index.account.AccountIndex;
 +import com.google.gerrit.server.index.account.AccountIndexCollection;
++import com.google.gerrit.server.index.group.GroupIndex;
++import com.google.gerrit.server.index.group.GroupIndexCollection;
++import com.google.gerrit.server.util.time.TimeUtil;
 +import com.google.gwtorm.server.SchemaFactory;
 +import com.google.inject.Inject;
 +import java.io.IOException;
@@ -68,43 +73,61 @@ index 0000000000..12a223c568
 +import java.nio.file.Path;
 +import java.nio.file.Paths;
 +import java.util.ArrayList;
-+import java.util.Collections;
-+import java.util.HashMap;
 +import java.util.List;
++import java.util.Optional;
 +import org.apache.commons.validator.routines.EmailValidator;
 +
 +public class InitSFUser implements InitStep {
-+    private final ConsoleUI ui;
-+    private final InitFlags flags;
-+    private final VersionedAuthorizedKeysOnInit.Factory authorizedKeysFactory;
-+    private final ExternalIdsOnInit externalIds;
-+    private SchemaFactory<ReviewDb> dbFactory;
-+    private AccountIndexCollection indexCollection;
++  private final InitFlags flags;
++  private final ConsoleUI ui;
++  private final AllUsersNameOnInitProvider allUsers;
++  private final AccountsOnInit accounts;
++  private final VersionedAuthorizedKeysOnInit.Factory authorizedKeysFactory;
++  private final ExternalIdsOnInit externalIds;
++  private final SequencesOnInit sequencesOnInit;
++  private final GroupsOnInit groupsOnInit;
++  private SchemaFactory<ReviewDb> dbFactory;
++  private AccountIndexCollection accountIndexCollection;
++  private GroupIndexCollection groupIndexCollection;
 +
-+    @Inject
-+    InitSFUser(
-+               InitFlags flags,
-+               ConsoleUI ui,
-+               VersionedAuthorizedKeysOnInit.Factory authorizedKeysFactory,
-+               ExternalIdsOnInit externalIds) {
-+        this.flags = flags;
-+        this.ui = ui;
-+        this.authorizedKeysFactory = authorizedKeysFactory;
-+        this.externalIds = externalIds;
-+    }
++  @Inject
++  InitSFUser(
++      InitFlags flags,
++      ConsoleUI ui,
++      AllUsersNameOnInitProvider allUsers,
++      AccountsOnInit accounts,
++      VersionedAuthorizedKeysOnInit.Factory authorizedKeysFactory,
++      ExternalIdsOnInit externalIds,
++      SequencesOnInit sequencesOnInit,
++      GroupsOnInit groupsOnInit) {
++    this.flags = flags;
++    this.ui = ui;
++    this.allUsers = allUsers;
++    this.accounts = accounts;
++    this.authorizedKeysFactory = authorizedKeysFactory;
++    this.externalIds = externalIds;
++    this.sequencesOnInit = sequencesOnInit;
++    this.groupsOnInit = groupsOnInit;
++  }
 +
-+    @Override
-+    public void run() {}
++  @Override
++  public void run() {}
 +
-+    @Inject(optional = true)
-+    void set(SchemaFactory<ReviewDb> dbFactory) {
-+        this.dbFactory = dbFactory;
-+    }
++  @Inject(optional = true)
++  void set(SchemaFactory<ReviewDb> dbFactory) {
++    this.dbFactory = dbFactory;
++  }
 +
-+    @Inject(optional = true)
-+    void set(AccountIndexCollection indexCollection) {
-+        this.indexCollection = indexCollection;
-+    }
++  @Inject
++  void set(AccountIndexCollection accountIndexCollection) {
++    this.accountIndexCollection = accountIndexCollection;
++  }
++
++  @Inject
++  void set(GroupIndexCollection groupIndexCollection) {
++    this.groupIndexCollection = groupIndexCollection;
++  }
++
 +
 +    @Override
 +    public void postRun() throws Exception {
@@ -114,8 +137,8 @@ index 0000000000..12a223c568
 +        }
 +        System.out.println("Creating Admin user");
 +        try (ReviewDb db = dbFactory.open()) {
-+            if (db.accounts().anyAccounts().toList().isEmpty()) {
-+                Account.Id id = new Account.Id(db.nextAccountId());
++            if (!accounts.hasAnyAccount()) {
++                Account.Id id = new Account.Id(sequencesOnInit.nextAccountId(db));
 +                String username = "admin";
 +                String name = "Administrator";
 +                AccountSshKey sshKey = readSshKey(id);
@@ -127,34 +150,44 @@ index 0000000000..12a223c568
 +                if (email != null) {
 +                    extIds.add(ExternalId.createEmail(id, email));
 +                }
-+                externalIds.insert(db, extIds);
++                externalIds.insert("Add external IDs for initial admin user", extIds);
 +
 +                Account a = new Account(id, TimeUtil.nowTs());
 +                a.setFullName(name);
 +                a.setPreferredEmail(email);
-+                db.accounts().insert(Collections.singleton(a));
++		accounts.insert(a);
 +
-+                AccountGroupName adminGroupName =
-+                    db.accountGroupNames().get(new AccountGroup.NameKey("Administrators"));
-+                AccountGroupMember m =
-+                    new AccountGroupMember(new AccountGroupMember.Key(id, adminGroupName.getId()));
-+                db.accountGroupMembers().insert(Collections.singleton(m));
++          // Only two groups should exist at this point in time and hence iterating over all of them
++          // is cheap.
++          Optional<GroupReference> adminGroupReference =
++              groupsOnInit
++                  .getAllGroupReferences(db)
++                  .filter(group -> group.getName().equals("Administrators"))
++                  .findAny();
++          if (!adminGroupReference.isPresent()) {
++            throw new NoSuchGroupException("Administrators");
++          }
++          GroupReference adminGroup = adminGroupReference.get();
++          groupsOnInit.addGroupMember(db, adminGroup.getUUID(), a);
 +
-+                if (sshKey != null) {
-+                    VersionedAuthorizedKeysOnInit authorizedKeys = authorizedKeysFactory.create(id).load();
-+                    authorizedKeys.addKey(sshKey.getSshPublicKey());
-+                    authorizedKeys.save("Add SSH key for initial admin user\n");
-+                }
++          if (sshKey != null) {
++            VersionedAuthorizedKeysOnInit authorizedKeys = authorizedKeysFactory.create(id).load();
++            authorizedKeys.addKey(sshKey.sshPublicKey());
++            authorizedKeys.save("Add SSH key for initial admin user\n");
++          }
 +
-+                AccountGroup adminGroup = db.accountGroups().get(adminGroupName.getId());
-+                AccountState as =
-+                    new AccountState(
-+                                     a, Collections.singleton(adminGroup.getGroupUUID()), extIds, new HashMap<>());
-+                for (AccountIndex accountIndex : indexCollection.getWriteIndexes()) {
-+                    accountIndex.replace(as);
-+                }
-+            }
++          AccountState as = AccountState.forAccount(new AllUsersName(allUsers.get()), a, extIds);
++          for (AccountIndex accountIndex : accountIndexCollection.getWriteIndexes()) {
++            accountIndex.replace(as);
++          }
++
++          InternalGroup adminInternalGroup = groupsOnInit.getExistingGroup(db, adminGroup);
++          for (GroupIndex groupIndex : groupIndexCollection.getWriteIndexes()) {
++            groupIndex.replace(adminInternalGroup);
++          }
++
 +        }
++      }
 +    }
 +
 +    private String readHttpPassword() throws IOException {
@@ -173,9 +206,9 @@ index 0000000000..12a223c568
 +    private AccountSshKey readSshKey(Account.Id id) throws IOException {
 +        Path sshKeyPath = Paths.get(System.getProperty("user.home"), ".init", "admin_ssh_key.pub");
 +        String content = new String(Files.readAllBytes(sshKeyPath), UTF_8).replaceAll("(\\r|\\n)", "");
-+        return new AccountSshKey(new AccountSshKey.Id(id, 1), content);
++        return AccountSshKey.create(id, 1, content);
 +    }
 +}
 -- 
-2.16.1
+2.20.1
 
