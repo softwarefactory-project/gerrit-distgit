@@ -3,7 +3,7 @@
 VERSION=2.14.7
 PLUGIN_BRANCH=stable-2.14
 MYSQL_CONNECTOR_BUNDLE=5.1.41
-PLUGINS="avatars-gravatar delete-project reviewers-by-blame"
+PLUGINS="avatars-gravatar delete-project reviewers-by-blame oauth"
 
 function install_bazel() {
     sudo yum install -y https://copr-be.cloud.fedoraproject.org/results/vbatts/bazel/epel-7-x86_64/00725354-bazel/bazel-0.11.1-1.el7.centos.x86_64.rpm
