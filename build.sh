@@ -3,7 +3,7 @@
 VERSION=2.16.7
 PLUGIN_BRANCH=stable-2.16
 MYSQL_CONNECTOR_BUNDLE=5.1.41
-PLUGINS="avatars-gravatar delete-project reviewers-by-blame"
+PLUGINS="avatars-gravatar delete-project reviewers-by-blame oauth"
 
 function install_bazel() {
     sudo curl -o /etc/yum.repos.d/bazel.repo https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo
