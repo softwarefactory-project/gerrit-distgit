@@ -1,0 +1,75 @@
+---
+- hosts: gerrit-builder
+  tasks:
+    - name: Install sf-master repository
+      yum:
+        name: "https://softwarefactory-project.io/repos/sf-release-master.rpm"
+      become: yes
+
+    - name: Install tooling
+      yum:
+        name: '{{ item }}'
+      become: yes
+      loop:
+        - java-1.8.0-openjdk
+        - rpm-build
+        - mock
+        - createrepo
+        - nodejs
+        - gcc-c++
+
+    - name: Configure git
+      block:
+        - git_config:
+            value: "Software Factory CI"
+            scope: global
+            name: user.name
+        - git_config:
+            name: user.email
+            scope: global
+            value: "admin@softwarefactory-project.io"
+
+    - name: copy bowerrc to root dir
+      copy:
+        src: "{{ zuul.project.src_dir }}/.bowerrc"
+        dest: "/"
+        remote_src: yes
+      become: yes
+
+    - name: run gerrit prebuild
+      command: 'sh build.sh'
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: prepare srpm
+      command: 'rpmbuild -bs -D "_srcrpmdir {{ ansible_user_dir }}/{{ zuul.project.src_dir }}" -D "_sourcedir {{ ansible_user_dir }}/{{ zuul.project.src_dir }}" gerrit.spec'
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: Adding user to mock group
+      user:
+        name: "{{ ansible_user }}"
+        groups: mock
+        append: yes
+      become: yes
+
+    - name: Register the srpm
+      find:
+        paths: "{{ zuul.project.src_dir }}"
+        patterns: "*.src.rpm"
+      register: srpm
+
+    - name: create rpm result directory
+      file:
+        path: "{{ zuul.project.src_dir }}/artifacts/rpm"
+        state: directory
+
+    - name: build rpm in mock
+      command: "mock --no-clean --no-cleanup-after --resultdir {{ ansible_user_dir }}/{{ zuul.project.src_dir }}/artifacts/rpm --rebuild {{ ansible_user_dir }}/{{ srpm.files[0].path }}"
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: create repo data
+      command: "createrepo {{ ansible_user_dir }}/{{ zuul.project.src_dir }}/artifacts/rpm/"
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
