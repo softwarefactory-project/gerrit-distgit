@@ -1,0 +1,27 @@
+---
+- hosts: gerrit-builder
+  tasks:
+    - name: Install tooling
+      yum:
+        name: '{{ item }}'
+      become: yes
+      loop:
+        - java-1.8.0-openjdk
+        - rpm-build
+        - mock
+
+    - name: run gerrit prebuild
+      command: 'sh build.sh'
+      become: yes
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: prepare src.rpm
+      command: 'rpmbuild -bs -D "_srcrpmdir $(pwd)" -D "_sourcedir $(pwd)" gerrit.spec'
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: build rpm in mock
+      command: "mock --no-clean --no-cleanup-after --rebuild *.src.rpm"
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
