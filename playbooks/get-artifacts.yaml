@@ -1,0 +1,18 @@
+---
+- hosts: gerrit-builder
+  tasks:
+    - name: Remove empty directories
+      command: "find {{ artifacts }} -type d -empty -delete"
+
+    - name: Copy rpms
+      copy:
+        src: "/var/lib/mock/epel-7-x86_64/result"
+        dest: "{{ artifacts }}/build"
+        remote_src: yes
+
+    - name: Fetch artifacts
+      synchronize:
+        src: "{{ artifacts }}/"
+        dest: "{{ zuul.executor.log_root }}/logs"
+        mode: pull
+      become: yes
