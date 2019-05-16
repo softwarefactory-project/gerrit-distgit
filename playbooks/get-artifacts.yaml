@@ -1,0 +1,9 @@
+---
+- hosts: gerrit-builder
+  tasks:
+    - name: Fetch artifacts
+      synchronize:
+        src: "{{ zuul.project.src_dir }}/artifacts/"
+        dest: "{{ zuul.executor.log_root }}/logs"
+        mode: pull
+      become: yes
