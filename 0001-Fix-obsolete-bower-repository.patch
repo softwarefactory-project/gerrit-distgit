@@ -1,0 +1,30 @@
+From 150112316e1e4b196e929616d4fc8eaf8be03eea Mon Sep 17 00:00:00 2001
+From: Matthieu Huin <mhuin@redhat.com>
+Date: Thu, 4 Jul 2019 14:18:38 +0000
+Subject: [PATCH 1/1] Fix obsolete bower repository
+
+---
+ tools/js/download_bower.py | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/tools/js/download_bower.py b/tools/js/download_bower.py
+index 3db39d5..14ff613 100755
+--- a/tools/js/download_bower.py
++++ b/tools/js/download_bower.py
+@@ -66,9 +66,11 @@ def ignore_deps(info):
+   # As of 1.6.5 I don't think ignoredDependencies can be specified on the
+   # command line with --config, so we have to create .bowerrc.
+   deps = info.get('dependencies')
++  rc = {'registry': 'https://registry.bower.io'}
+   if deps:
+-    with open(os.path.join('.bowerrc'), 'w') as f:
+-      json.dump({'ignoredDependencies': list(deps.keys())}, f)
++    rc['ignoredDependencies'] = list(deps.keys())
++  with open(os.path.join('.bowerrc'), 'w') as f:
++    json.dump(rc, f)
+ 
+ 
+ def cache_entry(name, package, version, sha1):
+-- 
+1.8.3.1
+
