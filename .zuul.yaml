@@ -1,0 +1,23 @@
+---
+- project:
+    periodic:
+      jobs:
+        - gerrit-build-rpm
+    check:
+      jobs:
+        - gerrit-build-rpm
+    gate:
+      jobs:
+        - gerrit-build-rpm
+
+- job:
+    name: gerrit-build-rpm
+    parent: base
+    description: build the gerrit .war and the rpm
+    timeout: 3600
+    nodeset:
+      nodes:
+        - name: gerrit-builder
+          label: cloud-centos-7
+    run: playbooks/gerrit-build-rpm.yaml
+    post-run: playbooks/get-artifacts.yaml
