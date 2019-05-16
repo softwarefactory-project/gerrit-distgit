@@ -1,0 +1,3 @@
+workspace: "./"
+home: "/home/{{ sfuser }}"
+sf_user: "zuul-worker"

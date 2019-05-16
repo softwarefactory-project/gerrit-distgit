@@ -1,0 +1,22 @@
+---
+- hosts: gerrit-builder
+  tasks:
+    - name: Create rpm directory
+      file:
+        path: "{{ zuul.project.src_dir }}/artifacts/rpm"
+        state: directory
+
+    - name: copy mock artifacts
+      copy:
+        src: "{{ item }}"
+        dest: "{{ zuul.project.src_dir }}/artifacts/rpm"
+        remote_src: yes
+      with_fileglob:
+        - "/var/lib/mock/epel-7-x86_64/result/*"
+
+    - name: Fetch bazel artifacts
+      synchronize:
+        src: "{{ zuul.project.src_dir }}/artifacts/"
+        dest: "{{ zuul.executor.log_root }}/logs"
+        mode: pull
+      become: yes
