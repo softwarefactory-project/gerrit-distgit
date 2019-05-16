@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 
-VERSION=2.16.7
+VERSION=2.16.8
 PLUGIN_BRANCH=stable-2.16
 MYSQL_CONNECTOR_BUNDLE=5.1.41
 PLUGINS="avatars-gravatar delete-project reviewers-by-blame"
@@ -30,6 +30,13 @@ function fetch_plugins() {
     popd
 }
 
+# fetch precompiled plugins here
+function get_plugin_binaries() {
+   pushd artifacts/plugins
+      curl -L -O https://github.com/davido/gerrit-oauth-provider/releases/download/v2.14.6.2/gerrit-oauth-provider.jar
+   popd
+}
+
 function fix_var_lib_usage() {
     git am -3 ../0001-QuickFix-read-only-usr-lib-dir.patch ../0001-Add-InitSFUser-method.patch
     TAG=v${VERSION}-sf
@@ -48,10 +55,10 @@ function gerrit_build() {
     fix_var_lib_usage
     # First build may fail because of incorrect bazel version detection, fix by adding 'return True' in
     # vim /home/centos/.cache/bazel/_bazel_centos/0a7817c27ccc8fb2acf95e4072130a42/external/io_bazel_rules_closure/closure/repositories.bzl +164
-    [ -f bazel-bin/release.war ] || bazel build release
+    [ -f bazel-bin/release.war ] || bazel build release --incompatible_disallow_filetype=false
     fetch_plugins
     for plugin in ${PLUGINS}; do
-        bazel build plugins/${plugin}:${plugin}.jar
+        bazel build plugins/${plugin}:${plugin}.jar --incompatible_disallow_filetype=false
     done
     popd
 }
@@ -60,6 +67,7 @@ function gerrit_install() {
     mkdir -p artifacts/lib artifacts/plugins
     cp -f gerrit/bazel-bin/release.war artifacts/
     cp -f gerrit/bazel-genfiles/plugins/*/*.jar artifacts/plugins/
+    get_plugin_binaries
     pushd artifacts
     # This plugin cause a stacktrace on start
     rm -f plugins/gr-delete-repo-static.jar plugins/cm-static.jar
