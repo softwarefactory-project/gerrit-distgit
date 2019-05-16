@@ -3,10 +3,12 @@
 VERSION=2.14.7
 PLUGIN_BRANCH=stable-2.14
 MYSQL_CONNECTOR_BUNDLE=5.1.41
-PLUGINS="avatars-gravatar delete-project reviewers-by-blame"
+PLUGINS="avatars-gravatar delete-project reviewers-by-blame oauth"
 
 function install_bazel() {
-    sudo yum install -y https://copr-be.cloud.fedoraproject.org/results/vbatts/bazel/epel-7-x86_64/00725354-bazel/bazel-0.11.1-1.el7.centos.x86_64.rpm
+    sudo curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.18.0/bazel-0.18.0-installer-linux-x86_64.sh
+    sudo chmod -x bazel-0.18.0-installer-linux-x86_64.sh
+    sudo bazel-0.18.0-installer-linux-x86_64.sh
 }
 
 function fetch_gerrit_sources() {
@@ -44,7 +46,7 @@ function fix_var_lib_usage() {
 
 # Main functions
 function gerrit_prepare() {
-    type bazel || install_bazel
+    type /usr/local/bin/bazel || install_bazel
     [ -d gerrit ] || fetch_gerrit_sources
 }
 
@@ -53,10 +55,10 @@ function gerrit_build() {
     fix_var_lib_usage
     # First build may fail because of incorrect bazel version detection, fix by adding 'return True' in
     # vim /home/centos/.cache/bazel/_bazel_centos/0a7817c27ccc8fb2acf95e4072130a42/external/io_bazel_rules_closure/closure/repositories.bzl +164
-    [ -f bazel-bin/release.war ] || bazel build release
+    [ -f bazel-bin/release.war ] || /usr/local/bin/bazel build release
     fetch_plugins
     for plugin in ${PLUGINS}; do
-        bazel build plugins/${plugin}:${plugin}.jar
+        /usr/local/bin/bazel build plugins/${plugin}:${plugin}.jar
     done
     popd
 }
