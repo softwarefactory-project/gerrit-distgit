@@ -1,0 +1,39 @@
+---
+- hosts: gerrit-builder
+  tasks:
+    - name: Install tooling
+      yum:
+        name: '{{ item }}'
+      become: yes
+      loop:
+        - java-1.8.0-openjdk
+        - rpm-build
+        - mock
+        - node
+
+    - name: Configure git
+      block:
+        - git_config:
+            value: "Software Factory CI"
+            scope: global
+            name: user.name
+        - git_config:
+            name: user.email
+            scope: global
+            value: "admin@softwarefactory-project.io"
+
+    - name: run gerrit prebuild
+      command: 'sh build.sh'
+      become: yes
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: prepare src.rpm
+      command: 'rpmbuild -bs -D "_srcrpmdir {{ zuul.project.src_dir }}" -D "_sourcedir {{ zuul.project.src_dir }}" gerrit.spec'
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: build rpm in mock
+      command: "mock --no-clean --no-cleanup-after --rebuild *.src.rpm"
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
