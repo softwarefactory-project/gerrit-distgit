@@ -1,5 +1,5 @@
 Name:          gerrit
-Version:       2.16.7
+Version:       2.16.8
 Release:       1%{?dist}
 Summary:       Code review system
 
@@ -153,6 +153,10 @@ exit 0
 %{_libdir}/gerrit/plugins/reviewers-by-blame.jar
 
 %changelog
+* Thu May 16 2019 Matthieu Huin <mhuin@redhat.com> - 2.16.8-1
+- Update version to 2.16.8
+- add oauth plugin
+
 * Fri Apr 05 2019 Tristan Cacqueray <tdecacqu@redhat.com> - 2.16.7-1
 - Update version to 2.16.7
 
