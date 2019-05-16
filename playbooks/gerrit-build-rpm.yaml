@@ -1,0 +1,20 @@
+---
+- hosts: gerrit-builder
+  tasks:
+    - name: Install tooling
+      yum:
+        name: '{{ item }}'
+      become: yes
+      loop:
+        - java-1.8.0-openjdk
+        - rpm-build
+        - mock
+
+    - name: run gerrit prebuild
+      command: 'build.sh'
+
+    - name: prepare src.rpm
+      command: 'rpmbuild -bs -D "_srcrpmdir $(pwd)" -D "_sourcedir $(pwd)" gerrit.spec'
+
+    - name: build rpm in mock
+      commande: "mock --no-clean --no-cleanup-after --rebuild *.src.rpm"
