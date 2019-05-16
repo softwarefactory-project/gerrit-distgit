@@ -1,11 +1,11 @@
 Name:          gerrit
 Version:       2.14.7
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       Code review system
 
 License:       APACHE-2
 URL:           https://www.gerritcodereview.com
-Source0:       https://softwarefactory-project.io/mirrors/gerrit/gerrit-%{version}.tar.gz
+Source0:       https://softwarefactory-project.io/mirrors/gerrit/gerrit-%{version}-%{release}.tar.gz
 Source1:       gerrit.service
 Source2:       gerrit.sh
 
@@ -71,6 +71,14 @@ Summary:       Gerrit reviewers-by-blame plugin
 
 %description plugin-reviewers-by-blame
 Gerrit reviewers-by-blame plugin
+
+%package plugin-oauth
+Requires:      gerrit
+Summary:       Gerrit oauth plugin
+
+%description plugin-oauth
+Gerrit oauth plugin
+
 
 %prep
 %setup -q -c gerrit-%{version}
@@ -152,7 +160,14 @@ exit 0
 %files plugin-reviewers-by-blame
 %{_libdir}/gerrit/plugins/reviewers-by-blame.jar
 
+%files plugin-oauth
+%{_libdir}/gerrit/plugins/oauth.jar
+
+
 %changelog
+* Thu May 16 2019 Matthieu Huin <mhuin@redhat.com> - 2.14.7-2
+- add oauth plugin
+
 * Wed Mar 28 2018 Tristan Cacqueray <tdecacqu@redhat.com> - 2.14.7-1
 - Update version to 2.14.7
 
