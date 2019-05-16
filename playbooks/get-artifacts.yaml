@@ -1,0 +1,14 @@
+---
+- hosts: gerrit-builder
+  tasks:
+    - name: Fetch bazel artifacts
+      synchronize:
+        src: "{{ zuul.project.src_dir }}/artifacts/"
+        dest: "{{ zuul.executor.log_root }}/logs/bazel"
+        mode: pull
+      become: yes
+
+    - name: Fetch mock artifacts
+      synchronize:
+        src: "/var/lib/mock/epel-7-x86_64/result/"
+        dest: "{{ zuul.executor.log_root }}/logs/rpm" 
