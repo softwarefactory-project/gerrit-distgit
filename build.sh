@@ -1,14 +1,16 @@
 #!/bin/sh -ex
 
-VERSION=2.14.7
+VERSION=2.15.14
 RELEASE=$(grep -e '^Release:' gerrit.spec  | awk '{print $2}' | grep -o '[[:digit:]]\+')
-PLUGIN_BRANCH=stable-2.14
+PLUGIN_BRANCH=stable-2.15
 MYSQL_CONNECTOR_BUNDLE=5.1.41
+# Check "minimum_bazel_version" in WORKSPACE in gerrit source
+BAZEL_VERSION=0.25.0
 PLUGINS="avatars-gravatar reviewers-by-blame oauth delete-project"
 
 function install_bazel() {
     # Always pick the minimal bzl version for this particular gerrit version
-    curl -L --output /tmp/bzl_install.sh https://github.com/bazelbuild/bazel/releases/download/0.14.0/bazel-0.14.0-installer-linux-x86_64.sh
+    curl -L --output /tmp/bzl_install.sh https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
     chmod +x /tmp/bzl_install.sh
     sudo /tmp/bzl_install.sh
 }
@@ -41,7 +43,7 @@ function fetch_plugins() {
 }
 
 function apply_patches() {
-    git am -3 ../0001-QuickFix-read-only-usr-lib-dir.patch ../0001-Add-InitSFUser-method.patch ../0001-Fix-some-bazel-related-problems.patch ../0001-Fix-obsolete-bower-repository.patch
+    git am -3 ../0001-QuickFix-read-only-usr-lib-dir.patch ../0001-Add-InitSFUser-method.patch
     TAG=v${VERSION}-sf
     git tag -d ${TAG} || true
     git tag -a -m ${TAG} ${TAG}
