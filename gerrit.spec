@@ -1,6 +1,6 @@
 Name:          gerrit
-Version:       2.14.7
-Release:       2%{?dist}
+Version:       2.15.14
+Release:       1%{?dist}
 Summary:       Code review system
 
 License:       APACHE-2
@@ -165,6 +165,9 @@ exit 0
 
 
 %changelog
+* Wed Jul 10 2019 Matthieu Huin <mhuin@redhat.com> - 2.15.14-1
+- Update version to 2.15.14
+
 * Thu May 16 2019 Matthieu Huin <mhuin@redhat.com> - 2.14.7-2
 - add oauth plugin
 
