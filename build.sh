@@ -1,8 +1,8 @@
 #!/bin/sh -ex
 
-VERSION=2.14.7
+VERSION=2.15.14
 RELEASE=$(grep -e '^Release:' gerrit.spec  | awk '{print $2}' | grep -o '[[:digit:]]\+')
-PLUGIN_BRANCH=stable-2.14
+PLUGIN_BRANCH=stable-2.15
 MYSQL_CONNECTOR_BUNDLE=5.1.41
 PLUGINS="avatars-gravatar reviewers-by-blame oauth delete-project"
 
