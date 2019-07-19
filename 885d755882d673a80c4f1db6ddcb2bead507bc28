@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "def90431_9c53e1b5",
+        "filename": ".zuul.yaml",
+        "patchSetId": 36
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 7
+      },
+      "writtenOn": "2019-07-19T11:16:19Z",
+      "side": 1,
+      "message": "That\u0027s not something we do often, I wonder if we should really fix any new build issue. Moreover, the next time we probably want to bump the gerrit version which is not covered by the job and it will probably need other fixes.",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 3,
+        "endChar": 13
+      },
+      "revId": "885d755882d673a80c4f1db6ddcb2bead507bc28",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48ecf49a_f6457cb1",
+        "filename": "build.sh",
+        "patchSetId": 36
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 7
+      },
+      "writtenOn": "2019-07-19T11:16:19Z",
+      "side": 1,
+      "message": "We shouldn\u0027t be using known path in /tmp. Just download in the CWD and run ./bzl_install.sh",
+      "range": {
+        "startLine": 11,
+        "startChar": 21,
+        "endLine": 11,
+        "endChar": 41
+      },
+      "revId": "885d755882d673a80c4f1db6ddcb2bead507bc28",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "10dbf7e0_894a3e4c",
         "filename": "playbooks/gerrit-build-rpm.yaml",
         "patchSetId": 36
