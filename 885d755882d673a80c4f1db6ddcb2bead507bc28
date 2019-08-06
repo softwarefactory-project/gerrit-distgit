@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fe093929_cf872619",
+        "filename": ".zuul.yaml",
+        "patchSetId": 36
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 68
+      },
+      "writtenOn": "2019-08-06T09:27:56Z",
+      "side": 1,
+      "message": "I agree doing it every day is a bit overkill, but I want to know when/if it happens. Last time we had to rebuild was long ago enough that we encountered a significant amount of non trivial problems, getting a heads-up is valuable.\n\nUntil the time we hopefully don\u0027t have to patch and rebuild anymore ...",
+      "parentUuid": "def90431_9c53e1b5",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 3,
+        "endChar": 13
+      },
+      "revId": "885d755882d673a80c4f1db6ddcb2bead507bc28",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48ecf49a_f6457cb1",
         "filename": "build.sh",
         "patchSetId": 36
