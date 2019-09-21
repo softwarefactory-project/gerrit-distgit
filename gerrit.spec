@@ -1,6 +1,6 @@
 Name:          gerrit
 Version:       2.14.7
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Code review system
 
 License:       APACHE-2
@@ -100,6 +100,7 @@ install -d -m 750 %{buildroot}%{_localstatedir}/log/gerrit
 
 install -d -m 755 %{buildroot}%{_sharedstatedir}/gerrit/
 install -d -m 755 %{buildroot}%{_sharedstatedir}/gerrit/hooks
+install -d -m 755 %{buildroot}%{_sharedstatedir}/gerrit/tmp
 ln -s /usr/lib64/gerrit/ %{buildroot}%{_sharedstatedir}/gerrit/bin
 ln -s /usr/lib64/gerrit/plugins/ %{buildroot}%{_sharedstatedir}/gerrit/plugins
 ln -s %{_localstatedir}/log/gerrit/ %{buildroot}%{_sharedstatedir}/gerrit/logs
@@ -133,6 +134,7 @@ exit 0
 %{_libexecdir}/gerrit/gerrit.sh
 %attr(0750,gerrit,gerrit) %dir %{_localstatedir}/log/gerrit
 %attr(0755,gerrit,gerrit) %dir %{_sharedstatedir}/gerrit
+%attr(0755,gerrit,gerrit) %dir %{_sharedstatedir}/gerrit/tmp
 %attr(0755,gerrit,gerrit) %dir %{_sysconfdir}/gerrit
 %{_sharedstatedir}/gerrit/*
 
@@ -165,6 +167,9 @@ exit 0
 
 
 %changelog
+* Sat Sep 21 2019 Matthieu Huin <mhuin@redhat.com> 2.14.7-3
+- create tmp folder preemptively with correct ownership
+
 * Thu May 16 2019 Matthieu Huin <mhuin@redhat.com> - 2.14.7-2
 - add oauth plugin
 
