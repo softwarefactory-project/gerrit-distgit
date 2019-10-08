@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4788c8a_31f5ce86",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 68
+      },
+      "writtenOn": "2019-10-08T08:46:55Z",
+      "side": 1,
+      "message": "The oidc plugin does some stuff in gerrit\u0027s tmp dir at startup. The tmp dir was somehow created and owned by root, resulting in a failure to start when activating this plugin, if gerrit is not started as the root user.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 21
+      },
+      "revId": "3d99ef4e4a81518a008e2d4202313e71a9a6d9a3",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    }
+  ]
+}
